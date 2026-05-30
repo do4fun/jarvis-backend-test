@@ -13,11 +13,8 @@ import fs from 'fs'
 import path from 'path'
 import http from 'http'
 import { parse } from 'url'
-import express from 'express'
-import cors from 'cors'
 import { WebSocketServer } from 'ws'
-import { handleChat } from './routes/chat'
-import { handleToken } from './routes/token'
+import app from './app'
 import { handleSTTConnection } from './ws/stt'
 import { logger } from './lib/logger'
 
@@ -26,18 +23,6 @@ const logsDir = path.join(process.cwd(), 'logs')
 if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true })
 
 const port = parseInt(process.env.PORT ?? '3001', 10)
-
-// ── Express ────────────────────────────────────────────────────────────────────
-const app = express()
-app.use(express.json())
-app.use(cors({
-  origin:      process.env.CORS_ORIGIN ?? 'http://localhost:3000',
-  credentials: true,
-}))
-
-app.post('/api/chat',  (req, res) => { void handleChat(req, res) })
-app.post('/api/token', (req, res) => { void handleToken(req, res) })
-app.get('/health', (_req, res) => res.json({ status: 'ok' }))
 
 // ── HTTP + WebSocket ───────────────────────────────────────────────────────────
 const httpServer = http.createServer(app)
